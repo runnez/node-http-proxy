@@ -41,7 +41,7 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
-    "test:ci": "NODE_OPTIONS='--use-system-ca' vitest run --coverage",
+    "test:ci": "vitest run --coverage",
     "test:watch": "vitest",
     "prepublishOnly": "npm run build",
     "version": "auto-changelog -p && git add CHANGELOG.md"
