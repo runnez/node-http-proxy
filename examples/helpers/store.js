@@ -19,46 +19,49 @@
 //
 // TODO: cached map-reduce views and auto-magic sharding.
 //
-var Store = module.exports = function Store () {
-  this.store = {};
-};
+export default class Store {
+  constructor() {
+    this.store = {};
+  }
 
-Store.prototype = {
-  get: function (key) {
-    return this.store[key]
-  },
-  set: function (key, value) {
-    return this.store[key] = value
-  },
-  handler:function () {
-    var store = this
-    return function (req, res) {
-      function send (obj, status) {
-        res.writeHead(200 || status,{'Content-Type': 'application/json'})
-        res.write(JSON.stringify(obj) + '\n')
-        res.end()
-      }
-      var url = req.url.split('?').shift()
+  get(key) {
+    return this.store[key];
+  }
+
+  set(key, value) {
+    return this.store[key] = value;
+  }
+
+  handler() {
+    const store = this;
+    return (req, res) => {
+      const send = (obj, status) => {
+        res.writeHead(200 || status, { 'Content-Type': 'application/json' });
+        res.write(`${JSON.stringify(obj)}\n`);
+        res.end();
+      };
+      const url = req.url.split('?').shift();
       if (url === '/') {
-        console.log('get index')
-        return send(Object.keys(store.store))
-      } else if (req.method == 'GET') {
-        var obj = store.get (url)
-        send(obj || {error: 'not_found', url: url}, obj ? 200 : 404)
+        console.log('get index');
+        return send(Object.keys(store.store));
+      } else if (req.method === 'GET') {
+        const obj = store.get(url);
+        send(obj || { error: 'not_found', url }, obj ? 200 : 404);
       } else {
         //post: buffer body, and parse.
-        var body = '', obj
-        req.on('data', function (c) { body += c})
-        req.on('end', function (c) {
+        let body = '';
+        let obj;
+        req.on('data', (c) => { body += c; });
+        req.on('end', () => {
           try {
-            obj = JSON.parse(body)
+            obj = JSON.parse(body);
           } catch (err) {
-            return send (err, 400)
+            return send(err, 400);
           }
-          store.set(url, obj)
-          send({ok: true})
-        })
+          store.set(url, obj);
+          send({ ok: true });
+        });
       } 
-    }
+    };
   }
 }

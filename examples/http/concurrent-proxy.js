@@ -24,10 +24,9 @@
 
 */
 
-var util = require('util'),
-    colors = require('colors'),
-    http = require('http'),
-    httpProxy = require('../../lib/http-proxy');
+import http from 'node:http';
+import { styleText } from 'node:util';
+import httpProxy from '../../dist/http-proxy.js';
 
 //
 // Basic Http Proxy Server
@@ -44,17 +43,17 @@ httpProxy.createServer({
 //
 
 
-var connections = [],
-    go;
+const connections = [];
+let go;
 
-http.createServer(function (req, res) {
-  connections.push(function () {
+http.createServer((req, res) => {
+  connections.push(() => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.write('request successfully proxied to: ' + req.url + '\n' + JSON.stringify(req.headers, true, 2));
+    res.write(`request successfully proxied to: ${req.url}\n${JSON.stringify(req.headers, true, 2)}`);
     res.end();
   });
 
-  process.stdout.write(connections.length + ', ');
+  process.stdout.write(`${connections.length}, `);
 
   if (connections.length > 110 || go) {
     go = true;
@@ -64,5 +63,5 @@ http.createServer(function (req, res) {
   }
 }).listen(9004);
 
-util.puts('http proxy server'.blue + ' started '.green.bold + 'on port '.blue + '8004'.yellow);
-util.puts('http server '.blue + 'started '.green.bold + 'on port '.blue + '9004 '.yellow);
+console.log(`${styleText('blue', 'http proxy server')}${styleText(['green', 'bold'], ' started ')}${styleText('blue', 'on port ')}${styleText('yellow', '8004')}`);
+console.log(`${styleText('blue', 'http server ')}${styleText(['green', 'bold'], 'started ')}${styleText('blue', 'on port ')}${styleText('yellow', '9004 ')}`);

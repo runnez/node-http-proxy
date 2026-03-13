@@ -24,11 +24,10 @@
 
 */
 
-var util = require('util'),
-    colors = require('colors'),
-    http = require('http'),
-    connect = require('connect'),
-    httpProxy = require('../../lib/http-proxy');
+import http from 'node:http';
+import { styleText } from 'node:util';
+import connect from 'connect';
+import httpProxy from '../../dist/http-proxy.js';
 
 //
 // Basic Connect App
@@ -40,7 +39,7 @@ connect.createServer(
     // we use threshold to 1
     threshold: 1
   }),
-  function (req, res) {
+  (req, res) => {
     proxy.web(req, res);
   }
 ).listen(8012);
@@ -48,18 +47,18 @@ connect.createServer(
 //
 // Basic Http Proxy Server
 //
-var proxy = httpProxy.createProxyServer({
+const proxy = httpProxy.createProxyServer({
   target: 'http://localhost:9012'
 });
 
 //
 // Target Http Server
 //
-http.createServer(function (req, res) {
+http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.write('request successfully proxied to: ' + req.url + '\n' + JSON.stringify(req.headers, true, 2));
+  res.write(`request successfully proxied to: ${req.url}\n${JSON.stringify(req.headers, true, 2)}`);
   res.end();
 }).listen(9012);
 
-util.puts('http proxy server'.blue + ' started '.green.bold + 'on port '.blue + '8012'.yellow);
-util.puts('http server '.blue + 'started '.green.bold + 'on port '.blue + '9012 '.yellow);
+console.log(`${styleText('blue', 'http proxy server')}${styleText(['green', 'bold'], ' started ')}${styleText('blue', 'on port ')}${styleText('yellow', '8012')}`);
+console.log(`${styleText('blue', 'http server ')}${styleText(['green', 'bold'], 'started ')}${styleText('blue', 'on port ')}${styleText('yellow', '9012 ')}`);

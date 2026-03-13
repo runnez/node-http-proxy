@@ -24,13 +24,9 @@
 
 */
 
-var https = require('https'),
-    http  = require('http'),
-    util  = require('util'),
-    path  = require('path'),
-    fs    = require('fs'),
-    colors = require('colors'),
-    httpProxy = require('../../lib/http-proxy');
+import https from 'node:https';
+import { styleText } from 'node:util';
+import httpProxy from '../../dist/http-proxy.js';
 
 //
 // Create a HTTP Proxy server with a HTTPS target
@@ -43,4 +39,4 @@ httpProxy.createProxyServer({
   }
 }).listen(8011);
 
-util.puts('http proxy server'.blue + ' started '.green.bold + 'on port '.blue + '8011'.yellow);
+console.log(`${styleText('blue', 'http proxy server')}${styleText(['green', 'bold'], ' started ')}${styleText('blue', 'on port ')}${styleText('yellow', '8011')}`);

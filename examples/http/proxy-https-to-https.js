@@ -24,23 +24,23 @@
 
 */
 
-var https = require('https'),
-    http = require('http'),
-    util = require('util'),
-    fs   = require('fs'),
-    path = require('path'),
-    colors = require('colors'),
-    httpProxy = require('../../lib/http-proxy'),
-    fixturesDir = path.join(__dirname, '..', '..', 'test', 'fixtures'),
-    httpsOpts = {
-      key: fs.readFileSync(path.join(fixturesDir, 'agent2-key.pem'), 'utf8'),
-      cert: fs.readFileSync(path.join(fixturesDir, 'agent2-cert.pem'), 'utf8')
-    };
+import https from 'node:https';
+import fs from 'node:fs';
+import path from 'node:path';
+import { styleText } from 'node:util';
+import httpProxy from '../../dist/http-proxy.js';
+
+const fixturesDir = path.join(import.meta.dirname, '..', '..', 'test', 'fixtures');
+
+const httpsOpts = {
+  key: fs.readFileSync(path.join(fixturesDir, 'agent2-key.pem'), 'utf8'),
+  cert: fs.readFileSync(path.join(fixturesDir, 'agent2-cert.pem'), 'utf8')
+};
 
 //
 // Create the target HTTPS server
 //
-https.createServer(httpsOpts, function (req, res) {
+https.createServer(httpsOpts, (req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.write('hello https\n');
   res.end();
@@ -55,5 +55,5 @@ httpProxy.createServer({
   secure: false
 }).listen(8010);
 
-util.puts('https proxy server'.blue + ' started '.green.bold + 'on port '.blue + '8010'.yellow);
-util.puts('https server '.blue + 'started '.green.bold + 'on port '.blue + '9010 '.yellow);
+console.log(`${styleText('blue', 'https proxy server')}${styleText(['green', 'bold'], ' started ')}${styleText('blue', 'on port ')}${styleText('yellow', '8010')}`);
+console.log(`${styleText('blue', 'https server ')}${styleText(['green', 'bold'], 'started ')}${styleText('blue', 'on port ')}${styleText('yellow', '9010 ')}`);

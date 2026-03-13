@@ -24,15 +24,13 @@
 
 */
 
-var util = require('util'),
-    colors = require('colors'),
-    http = require('http'),
-    httpProxy = require('../../lib/http-proxy');
+import { styleText } from 'node:util';
+import httpProxy from '../../dist/http-proxy.js';
 
 //
 // Http Proxy Server with bad target
 //
-var proxy = httpProxy.createServer({
+const proxy = httpProxy.createServer({
   target:'http://localhost:9005'
 });
 
@@ -43,7 +41,7 @@ proxy.listen(8005);
 
 //
 // Listen for the `error` event on `proxy`.
-proxy.on('error', function (err, req, res) {
+proxy.on('error', (err, req, res) => {
   res.writeHead(500, {
     'Content-Type': 'text/plain'
   });
@@ -52,4 +50,4 @@ proxy.on('error', function (err, req, res) {
 });
 
 
-util.puts('http proxy server '.blue + 'started '.green.bold + 'on port '.blue + '8005 '.yellow + 'with custom error message'.magenta.underline);
+console.log(`${styleText('blue', 'http proxy server ')}${styleText(['green', 'bold'], 'started ')}${styleText('blue', 'on port ')}${styleText('yellow', '8005 ')}${styleText(['magenta', 'underline'], 'with custom error message')}`);

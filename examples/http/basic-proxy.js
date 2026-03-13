@@ -24,12 +24,11 @@
 
 */
 
-var util = require('util'),
-    colors = require('colors'),
-    http = require('http'),
-    httpProxy = require('../../lib/http-proxy');
+import http from 'node:http';
+import { styleText } from 'node:util';
+import httpProxy from '../../dist/http-proxy.js';
 
-var welcome = [
+const welcome = [
   '#    # ##### ##### #####        #####  #####   ####  #    # #   #',
   '#    #   #     #   #    #       #    # #    # #    #  #  #   # # ',
   '######   #     #   #    # ##### #    # #    # #    #   ##     #  ',
@@ -38,7 +37,7 @@ var welcome = [
   '#    #   #     #   #            #      #    #  ####  #    #   #  '
 ].join('\n');
 
-util.puts(welcome.rainbow.bold);
+console.log(styleText(['rainbow', 'bold'], welcome));
 
 //
 // Basic Http Proxy Server
@@ -50,11 +49,11 @@ httpProxy.createServer({
 //
 // Target Http Server
 //
-http.createServer(function (req, res) {
+http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.write('request successfully proxied to: ' + req.url + '\n' + JSON.stringify(req.headers, true, 2));
+  res.write(`request successfully proxied to: ${req.url}\n${JSON.stringify(req.headers, true, 2)}`);
   res.end();
 }).listen(9003);
 
-util.puts('http proxy server'.blue + ' started '.green.bold + 'on port '.blue + '8003'.yellow);
-util.puts('http server '.blue + 'started '.green.bold + 'on port '.blue + '9003 '.yellow);
+console.log(`${styleText('blue', 'http proxy server')}${styleText(['green', 'bold'], ' started ')}${styleText('blue', 'on port ')}${styleText('yellow', '8003')}`);
+console.log(`${styleText('blue', 'http server ')}${styleText(['green', 'bold'], 'started ')}${styleText('blue', 'on port ')}${styleText('yellow', '9003 ')}`);
