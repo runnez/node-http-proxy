@@ -3,8 +3,8 @@ import http from 'http';
 import https from 'https';
 import type { IncomingMessage, ServerResponse, Server } from 'http';
 import type { Server as HttpsServer } from 'https';
-import * as web from './passes/web-incoming.js';
-import type { ProxyServerOptions, ProxyTargetUrl, ProxyPass, ErrorCallback } from '../types.js';
+import * as web from './passes/web-incoming';
+import type { ProxyServerOptions, ProxyTargetUrl, ProxyPass, ErrorCallback } from '../types';
 
 /**
  * Parse a URL string into a URL object with a `path` property

@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 import * as common from '../common.js';
-import type { ProxyServerOptions } from '../../types.js';
+import type { ProxyServerOptions } from '../../types';
 
 const redirectRegex = /^201|30(1|2|7|8)$/;
 

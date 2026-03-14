@@ -1,11 +1,11 @@
 import httpNative from 'http';
 import httpsNative from 'https';
 import type { IncomingMessage, ServerResponse, ClientRequest } from 'http';
-import * as web_o_module from './web-outgoing.js';
-import * as common from '../common.js';
+import * as web_o_module from './web-outgoing';
+import * as common from '../common';
 import followRedirects from 'follow-redirects';
-import type { ProxyServerOptions, ProxyTargetUrl, ErrorCallback } from '../../types.js';
-import type ProxyServer from '../index.js';
+import type { ProxyServerOptions, ProxyTargetUrl, ErrorCallback } from '../../types';
+import type ProxyServer from '../index';
 
 type OutgoingPass = (
   req: IncomingMessage,

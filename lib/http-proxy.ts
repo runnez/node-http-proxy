@@ -1,5 +1,5 @@
-import ProxyServer from './http-proxy/index.js';
-import type { ProxyServerOptions } from './types.js';
+import ProxyServer from './http-proxy/index';
+import type { ProxyServerOptions } from './types';
 
 function createProxyServer(options?: ProxyServerOptions): ProxyServer {
   return new ProxyServer(options);

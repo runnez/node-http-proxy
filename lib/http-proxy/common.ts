@@ -1,7 +1,7 @@
 import url from 'url';
 import required from 'requires-port';
 import type { IncomingMessage } from 'http';
-import type { ProxyServerOptions, ProxyTargetUrl } from '../types.js';
+import type { ProxyServerOptions, ProxyTargetUrl } from '../types';
 
 const upgradeHeader = /(^|,)\s*upgrade\s*($|,)/i;
 
