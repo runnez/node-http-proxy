@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import * as common from '../lib/http-proxy/common.js';
+import * as common from '../lib/http-proxy/common';
 
-describe('lib/http-proxy/common.js', () => {
+describe('lib/http-proxy/common', () => {
   describe('#setupOutgoing', () => {
     it('should setup the correct headers', () => {
       const outgoing = {} as any;

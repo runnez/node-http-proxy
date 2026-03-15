@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import * as httpProxy from '../lib/http-proxy/passes/web-outgoing.js';
+import * as httpProxy from '../lib/http-proxy/passes/web-outgoing';
 
-describe('lib/http-proxy/passes/web-outgoing.js', () => {
+describe('lib/http-proxy/passes/web-outgoing', () => {
   describe('#setRedirectHostRewrite', () => {
     let req: any, proxyRes: any, options: any;
 

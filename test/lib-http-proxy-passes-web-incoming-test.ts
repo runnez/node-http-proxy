@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import * as webPasses from '../lib/http-proxy/passes/web-incoming.js';
-import httpProxy from '../lib/http-proxy.js';
+import * as webPasses from '../lib/http-proxy/passes/web-incoming';
+import HttpProxy from '../lib/http-proxy';
 import concat from 'concat-stream';
 import async from 'async';
 import http from 'http';
@@ -14,7 +14,7 @@ Object.defineProperty(gen, 'port', {
   }
 });
 
-describe('lib/http-proxy/passes/web.js', () => {
+describe('lib/http-proxy/passes/web', () => {
   describe('#deleteLength', () => {
     it('should change `content-length` for DELETE requests', () => {
       const stubRequest = {
@@ -88,7 +88,7 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should proxy the request using the web proxy handler', () => {
     return new Promise<void>((done) => {
       const ports = { source: gen.port, proxy: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         target: 'http://127.0.0.1:' + ports.source
       });
 
@@ -116,7 +116,7 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should detect a proxyReq event and modify headers', () => {
     return new Promise<void>((done) => {
       const ports = { source: gen.port, proxy: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         target: 'http://127.0.0.1:' + ports.source,
       });
 
@@ -147,7 +147,7 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should skip proxyReq event when handling a request with header "expect: 100-continue"', () => {
     return new Promise<void>((done) => {
       const ports = { source: gen.port, proxy: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         target: 'http://127.0.0.1:' + ports.source,
       });
 
@@ -194,14 +194,14 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should proxy the request and handle error via callback', () => {
     return new Promise<void>((done) => {
       const ports = { proxy: gen.port, dead: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         target: 'http://127.0.0.1:' + ports.dead
       });
 
       const proxyServer = http.createServer(requestHandler);
 
       function requestHandler(req: http.IncomingMessage, res: http.ServerResponse) {
-        proxy.web(req, res, (err: any) => {
+        proxy.web(req, res, undefined, (err: any) => {
           proxyServer.close();
           expect(err).toBeInstanceOf(Error);
           expect(err.code).toBe('ECONNREFUSED');
@@ -222,7 +222,7 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should proxy the request and handle error via event listener', () => {
     return new Promise<void>((done) => {
       const ports = { proxy: gen.port, dead: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         target: 'http://127.0.0.1:' + ports.dead
       });
 
@@ -254,7 +254,7 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should forward the request and handle error via event listener', () => {
     return new Promise<void>((done) => {
       const ports = { proxy: gen.port, dead: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         forward: 'http://127.0.0.1:' + ports.dead
       });
 
@@ -286,7 +286,7 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should proxy the request and handle timeout error (proxyTimeout)', () => {
     return new Promise<void>((done) => {
       const ports = { proxy: gen.port, blackhole: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         target: 'http://127.0.0.1:' + ports.blackhole,
         proxyTimeout: 100
       });
@@ -325,7 +325,7 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should proxy the request and handle timeout error', () => {
     return new Promise<void>((done) => {
       const ports = { proxy: gen.port, blackhole: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         target: 'http://127.0.0.1:' + ports.blackhole,
         timeout: 100
       });
@@ -377,7 +377,7 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should proxy the request and provide a proxyRes event with the request and response parameters', () => {
     return new Promise<void>((done) => {
       const ports = { source: gen.port, proxy: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         target: 'http://127.0.0.1:' + ports.source
       });
 
@@ -408,7 +408,7 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should proxy the request and provide and respond to manual user response when using modifyResponse', () => {
     return new Promise<void>((done) => {
       const ports = { source: gen.port, proxy: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         target: 'http://127.0.0.1:' + ports.source,
         selfHandleResponse: true
       });
@@ -449,7 +449,7 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should proxy the request and handle changeOrigin option', () => {
     return new Promise<void>((done) => {
       const ports = { source: gen.port, proxy: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         target: 'http://127.0.0.1:' + ports.source,
         changeOrigin: true
       });
@@ -478,7 +478,7 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should proxy the request with the Authorization header set', () => {
     return new Promise<void>((done) => {
       const ports = { source: gen.port, proxy: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         target: 'http://127.0.0.1:' + ports.source,
         auth: 'user:pass'
       });
@@ -508,7 +508,7 @@ describe('#createProxyServer.web() using own http server', () => {
   it('should proxy requests to multiple servers with different options', () => {
     return new Promise<void>((done) => {
       const ports = { proxy: gen.port, source1: gen.port, source2: gen.port };
-      const proxy = httpProxy.createProxyServer();
+      const proxy = HttpProxy.createProxyServer();
 
       function requestHandler(req: http.IncomingMessage, res: http.ServerResponse) {
         if (req.url!.indexOf('/s1/') === 0) {
@@ -555,7 +555,7 @@ describe('#followRedirects', () => {
   it('should proxy the request follow redirects', () => {
     return new Promise<void>((done) => {
       const ports = { source: gen.port, proxy: gen.port };
-      const proxy = httpProxy.createProxyServer({
+      const proxy = HttpProxy.createProxyServer({
         target: 'http://127.0.0.1:' + ports.source,
         followRedirects: true
       });

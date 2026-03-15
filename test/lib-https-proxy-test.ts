@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import httpProxy from '../lib/http-proxy.js';
+import httpProxy from '../lib/http-proxy';
 import http from 'http';
 import https from 'https';
 import path from 'path';
@@ -16,7 +16,7 @@ Object.defineProperty(gen, 'port', {
   }
 });
 
-describe('lib/http-proxy.js', () => {
+describe('lib/http-proxy', () => {
   describe('HTTPS #createProxyServer', () => {
     describe('HTTPS to HTTP', () => {
       it('should proxy the request and send back the response', () => {

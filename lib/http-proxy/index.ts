@@ -4,7 +4,17 @@ import https from 'https';
 import type { IncomingMessage, ServerResponse, Server } from 'http';
 import type { Server as HttpsServer } from 'https';
 import * as web from './passes/web-incoming';
-import type { ProxyServerOptions, ProxyTargetUrl, ProxyPass, ErrorCallback } from '../types';
+import type {
+  ProxyServerOptions,
+  ProxyTargetUrl,
+  ProxyPass,
+  ErrorCallback,
+  StartCallback,
+  ProxyReqCallback,
+  ProxyResCallback,
+  EconnresetCallback,
+  EndCallback,
+} from '../types';
 
 /**
  * Parse a URL string into a URL object with a `path` property
@@ -23,64 +33,7 @@ function parseUrl(urlStr: string): ProxyTargetUrl {
   };
 }
 
-type WebHandler = (
-  req: IncomingMessage,
-  res: ServerResponse,
-  ...extraArgs: any[]
-) => void;
-
-/**
- * Returns a function that creates the loader for
- * `web`'s passes.
- */
-function createRightProxy(): (options: ProxyServerOptions) => WebHandler {
-  return function(options: ProxyServerOptions): WebHandler {
-    return function(this: ProxyServer, req: IncomingMessage, res: ServerResponse, ...extraArgs: any[]) {
-      const passes = this.webPasses;
-      let cntr = extraArgs.length - 1;
-      let head: Buffer | undefined;
-      let cbl: ErrorCallback | undefined;
-
-      if (typeof extraArgs[cntr] === 'function') {
-        cbl = extraArgs[cntr];
-        cntr--;
-      }
-
-      let requestOptions: ProxyServerOptions = options;
-      if (
-        cntr >= 0 &&
-        !(extraArgs[cntr] instanceof Buffer) &&
-        extraArgs[cntr] !== res
-      ) {
-        requestOptions = { ...options, ...extraArgs[cntr] };
-        cntr--;
-      }
-
-      if (cntr >= 0 && extraArgs[cntr] instanceof Buffer) {
-        head = extraArgs[cntr];
-      }
-
-      (['target', 'forward'] as const).forEach((e) => {
-        if (typeof requestOptions[e] === 'string')
-          (requestOptions as any)[e] = parseUrl(requestOptions[e] as string);
-      });
-
-      if (!requestOptions.target && !requestOptions.forward) {
-        return this.emit('error', new Error('Must provide a proper URL as target'));
-      }
-
-      for (let i = 0; i < passes.length; i++) {
-        if (passes[i](req, res, requestOptions, head, this, cbl)) {
-          break;
-        }
-      }
-    };
-  };
-}
-
 class ProxyServer extends EventEmitter {
-  web: WebHandler;
-  proxyRequest: WebHandler;
   options: ProxyServerOptions;
   webPasses: ProxyPass[];
   _server: Server | HttpsServer | null = null;
@@ -95,19 +48,47 @@ class ProxyServer extends EventEmitter {
     options = options || {};
     options.prependPath = options.prependPath === false ? false : true;
 
-    this.web = this.proxyRequest = createRightProxy()(options);
     this.options = options;
-
     this.webPasses = Object.keys(web).map((pass) => web[pass as keyof typeof web]) as ProxyPass[];
 
-    this.on('error', this.onError, this);
+    super.on('error', this.onError, this);
+  }
+
+  /**
+   * Used for proxying regular HTTP(S) requests.
+   */
+  web(req: IncomingMessage, res: ServerResponse, options?: ProxyServerOptions, callback?: ErrorCallback): void {
+    let requestOptions: ProxyServerOptions = options
+      ? { ...this.options, ...options }
+      : this.options;
+
+    (['target', 'forward'] as const).forEach((e) => {
+      if (typeof requestOptions[e] === 'string')
+        (requestOptions as any)[e] = parseUrl(requestOptions[e] as string);
+    });
+
+    if (!requestOptions.target && !requestOptions.forward) {
+      this.emit('error', new Error('Must provide a proper URL as target'));
+      return;
+    }
+
+    for (let i = 0; i < this.webPasses.length; i++) {
+      if (this.webPasses[i](req, res, requestOptions, undefined, this, callback)) {
+        break;
+      }
+    }
+  }
+
+  /**
+   * Alias for {@link web}.
+   */
+  proxyRequest(req: IncomingMessage, res: ServerResponse, options?: ProxyServerOptions, callback?: ErrorCallback): void {
+    this.web(req, res, options, callback);
   }
 
   onError(err: Error): void {
-    //
     // Remark: Replicate node core behavior using EE3
     // so we force people to handle their own errors
-    //
     if (this.listeners('error').length === 1) {
       throw err;
     }
@@ -116,21 +97,21 @@ class ProxyServer extends EventEmitter {
   listen(port: number, hostname?: string): this {
     const closure = (req: IncomingMessage, res: ServerResponse) => { this.web(req, res); };
 
-    this._server = this.options.ssl ?
-      https.createServer(this.options.ssl, closure) :
-      http.createServer(closure);
+    this._server = this.options.ssl
+      ? https.createServer(this.options.ssl, closure)
+      : http.createServer(closure);
 
     this._server.listen(port, hostname);
 
     return this;
   }
 
-  close(callback?: (...args: any[]) => void): void {
+  close(callback?: () => void): void {
     if (this._server) {
       this._server.close((...args: any[]) => {
         this._server = null;
         if (callback) {
-          callback(...args);
+          callback();
         }
       });
     }
@@ -167,8 +148,28 @@ class ProxyServer extends EventEmitter {
 
     passes.splice(i + 1, 0, callback);
   }
+
+  on(event: 'error', listener: ErrorCallback): this;
+  on(event: 'start', listener: StartCallback): this;
+  on(event: 'proxyReq', listener: ProxyReqCallback): this;
+  on(event: 'proxyRes', listener: ProxyResCallback): this;
+  on(event: 'econnreset', listener: EconnresetCallback): this;
+  on(event: 'end', listener: EndCallback): this;
+  on(event: string, listener: (...args: any[]) => void): this;
+  on(event: string, listener: (...args: any[]) => void, context?: any): this {
+    return super.on(event, listener, context);
+  }
+
+  once(event: 'error', listener: ErrorCallback): this;
+  once(event: 'start', listener: StartCallback): this;
+  once(event: 'proxyReq', listener: ProxyReqCallback): this;
+  once(event: 'proxyRes', listener: ProxyResCallback): this;
+  once(event: 'econnreset', listener: EconnresetCallback): this;
+  once(event: 'end', listener: EndCallback): this;
+  once(event: string, listener: (...args: any[]) => void): this;
+  once(event: string, listener: (...args: any[]) => void, context?: any): this {
+    return super.once(event, listener, context);
+  }
 }
 
 export default ProxyServer;
-export { createRightProxy };
-export type { WebHandler };

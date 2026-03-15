@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import httpProxy from '../lib/http-proxy.js';
+import httpProxy from '../lib/http-proxy';
 import http from 'http';
 import net from 'net';
 import SSE from 'sse';
@@ -12,7 +12,7 @@ Object.defineProperty(gen, 'port', {
   }
 });
 
-describe('lib/http-proxy.js', () => {
+describe('lib/http-proxy', () => {
   describe('#createProxyServer', () => {
     it.skip('should throw without options', () => {
       let error: unknown;
