@@ -1,11 +1,11 @@
 import { EventEmitter } from 'eventemitter3';
 import http from 'http';
 import https from 'https';
-import type { IncomingMessage, ServerResponse, Server } from 'http';
+import type { IncomingMessage, ServerResponse, ClientRequest, Server } from 'http';
 import type { Server as HttpsServer } from 'https';
 import * as web from './passes/web-incoming';
 import type {
-  ProxyServerOptions,
+  ServerOptions,
   ProxyTargetUrl,
   ProxyPass,
   ErrorCallback,
@@ -33,16 +33,18 @@ function parseUrl(urlStr: string): ProxyTargetUrl {
   };
 }
 
-class ProxyServer extends EventEmitter {
-  options: ProxyServerOptions;
+class ProxyServer<
+  TIncomingMessage = IncomingMessage,
+  TServerResponse = ServerResponse,
+> extends EventEmitter {
+  options: ServerOptions;
   webPasses: ProxyPass[];
   _server: Server | HttpsServer | null = null;
 
-  static createProxyServer: (options?: ProxyServerOptions) => ProxyServer;
-  static createServer: (options?: ProxyServerOptions) => ProxyServer;
-  static createProxy: (options?: ProxyServerOptions) => ProxyServer;
+  static createServer: <T = IncomingMessage, U = ServerResponse>(options?: ServerOptions) => ProxyServer<T, U> = (options) => new ProxyServer(options);
+  static createProxyServer: <T = IncomingMessage, U = ServerResponse>(options?: ServerOptions) => ProxyServer<T, U> = (options) => new ProxyServer(options);
 
-  constructor(options?: ProxyServerOptions) {
+  constructor(options?: ServerOptions) {
     super();
 
     options = options || {};
@@ -57,8 +59,8 @@ class ProxyServer extends EventEmitter {
   /**
    * Used for proxying regular HTTP(S) requests.
    */
-  web(req: IncomingMessage, res: ServerResponse, options?: ProxyServerOptions, callback?: ErrorCallback): void {
-    let requestOptions: ProxyServerOptions = options
+  web(req: IncomingMessage, res: ServerResponse, options?: ServerOptions, callback?: ErrorCallback): void {
+    let requestOptions: ServerOptions = options
       ? { ...this.options, ...options }
       : this.options;
 
@@ -82,7 +84,7 @@ class ProxyServer extends EventEmitter {
   /**
    * Alias for {@link web}.
    */
-  proxyRequest(req: IncomingMessage, res: ServerResponse, options?: ProxyServerOptions, callback?: ErrorCallback): void {
+  proxyRequest(req: IncomingMessage, res: ServerResponse, options?: ServerOptions, callback?: ErrorCallback): void {
     this.web(req, res, options, callback);
   }
 
@@ -149,23 +151,23 @@ class ProxyServer extends EventEmitter {
     passes.splice(i + 1, 0, callback);
   }
 
-  on(event: 'error', listener: ErrorCallback): this;
-  on(event: 'start', listener: StartCallback): this;
-  on(event: 'proxyReq', listener: ProxyReqCallback): this;
-  on(event: 'proxyRes', listener: ProxyResCallback): this;
-  on(event: 'econnreset', listener: EconnresetCallback): this;
-  on(event: 'end', listener: EndCallback): this;
+  on(event: 'error', listener: ErrorCallback<Error, TIncomingMessage, TServerResponse>): this;
+  on(event: 'start', listener: StartCallback<TIncomingMessage, TServerResponse>): this;
+  on(event: 'proxyReq', listener: ProxyReqCallback<ClientRequest, TIncomingMessage, TServerResponse>): this;
+  on(event: 'proxyRes', listener: ProxyResCallback<TIncomingMessage, TServerResponse>): this;
+  on(event: 'econnreset', listener: EconnresetCallback<Error, TIncomingMessage, TServerResponse>): this;
+  on(event: 'end', listener: EndCallback<TIncomingMessage, TServerResponse>): this;
   on(event: string, listener: (...args: any[]) => void): this;
   on(event: string, listener: (...args: any[]) => void, context?: any): this {
     return super.on(event, listener, context);
   }
 
-  once(event: 'error', listener: ErrorCallback): this;
-  once(event: 'start', listener: StartCallback): this;
-  once(event: 'proxyReq', listener: ProxyReqCallback): this;
-  once(event: 'proxyRes', listener: ProxyResCallback): this;
-  once(event: 'econnreset', listener: EconnresetCallback): this;
-  once(event: 'end', listener: EndCallback): this;
+  once(event: 'error', listener: ErrorCallback<Error, TIncomingMessage, TServerResponse>): this;
+  once(event: 'start', listener: StartCallback<TIncomingMessage, TServerResponse>): this;
+  once(event: 'proxyReq', listener: ProxyReqCallback<ClientRequest, TIncomingMessage, TServerResponse>): this;
+  once(event: 'proxyRes', listener: ProxyResCallback<TIncomingMessage, TServerResponse>): this;
+  once(event: 'econnreset', listener: EconnresetCallback<Error, TIncomingMessage, TServerResponse>): this;
+  once(event: 'end', listener: EndCallback<TIncomingMessage, TServerResponse>): this;
   once(event: string, listener: (...args: any[]) => void): this;
   once(event: string, listener: (...args: any[]) => void, context?: any): this {
     return super.once(event, listener, context);

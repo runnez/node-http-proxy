@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 import * as common from '../common.js';
-import type { ProxyServerOptions } from '../../types';
+import type { ServerOptions } from '../../types';
 
 const redirectRegex = /^201|30(1|2|7|8)$/;
 
@@ -29,7 +29,7 @@ export function setRedirectHostRewrite(
   req: IncomingMessage,
   res: ServerResponse,
   proxyRes: IncomingMessage,
-  options: ProxyServerOptions,
+  options: ServerOptions,
 ): void {
   if ((options.hostRewrite || options.autoRewrite || options.protocolRewrite)
       && proxyRes.headers['location']
@@ -62,7 +62,7 @@ export function writeHeaders(
   req: IncomingMessage,
   res: ServerResponse,
   proxyRes: IncomingMessage,
-  options: ProxyServerOptions,
+  options: ServerOptions,
 ): void {
   let rewriteCookieDomainConfig = options.cookieDomainRewrite;
   let rewriteCookiePathConfig = options.cookiePathRewrite;

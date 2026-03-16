@@ -29,7 +29,7 @@ export interface ProxyTargetUrl {
 
 export type ProxyTarget = string | ProxyTargetUrl | ProxyTargetDetailed;
 
-export interface ProxyServerOptions {
+export interface ServerOptions {
   /** URL string to be parsed with the url module. */
   target?: ProxyTarget;
   /** URL string to be parsed with the url module. */
@@ -112,7 +112,7 @@ export type ProxyReqCallback<
   proxyReq: TClientRequest,
   req: TIncomingMessage,
   res: TServerResponse,
-  options: ProxyServerOptions,
+  options: ServerOptions,
 ) => void;
 
 export type ProxyResCallback<
@@ -147,7 +147,7 @@ export type EndCallback<
 export type ProxyPass = (
   req: IncomingMessage,
   res: ServerResponse,
-  options: ProxyServerOptions,
+  options: ServerOptions,
   head: Buffer | undefined,
   server: any,
   clb?: ErrorCallback,

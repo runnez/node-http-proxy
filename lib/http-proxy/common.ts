@@ -1,7 +1,7 @@
 import url from 'url';
 import required from 'requires-port';
 import type { IncomingMessage } from 'http';
-import type { ProxyServerOptions, ProxyTargetUrl } from '../types';
+import type { ServerOptions, ProxyTargetUrl } from '../types';
 
 const upgradeHeader = /(^|,)\s*upgrade\s*($|,)/i;
 
@@ -36,12 +36,12 @@ export interface OutgoingOptions {
  */
 export function setupOutgoing(
   outgoing: OutgoingOptions,
-  options: ProxyServerOptions,
+  options: ServerOptions,
   req: IncomingMessage,
   forward?: string,
 ): OutgoingOptions {
   const forwardOrTarget = forward || 'target';
-  const target = options[forwardOrTarget as keyof ProxyServerOptions] as ProxyTargetUrl;
+  const target = options[forwardOrTarget as keyof ServerOptions] as ProxyTargetUrl;
 
   outgoing.port = target.port ||
                   (isSSL.test(target.protocol ?? '') ? 443 : 80);

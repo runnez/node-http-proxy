@@ -4,14 +4,14 @@ import type { IncomingMessage, ServerResponse, ClientRequest } from 'http';
 import * as web_o_module from './web-outgoing';
 import * as common from '../common';
 import followRedirects from 'follow-redirects';
-import type { ProxyServerOptions, ProxyTargetUrl, ErrorCallback } from '../../types';
+import type { ServerOptions, ProxyTargetUrl, ErrorCallback } from '../../types';
 import type ProxyServer from '../index';
 
 type OutgoingPass = (
   req: IncomingMessage,
   res: ServerResponse,
   proxyRes: IncomingMessage,
-  options: ProxyServerOptions,
+  options: ServerOptions,
 ) => boolean | void;
 
 const web_o: OutgoingPass[] = Object.keys(web_o_module).map(
@@ -23,7 +23,7 @@ const nativeAgents = { http: httpNative, https: httpsNative };
 /**
  * Sets `content-length` to '0' if request is of DELETE type.
  */
-export function deleteLength(req: IncomingMessage, res: ServerResponse, options: ProxyServerOptions): void {
+export function deleteLength(req: IncomingMessage, res: ServerResponse, options: ServerOptions): void {
   if ((req.method === 'DELETE' || req.method === 'OPTIONS')
      && !req.headers['content-length']) {
     req.headers['content-length'] = '0';
@@ -34,7 +34,7 @@ export function deleteLength(req: IncomingMessage, res: ServerResponse, options:
 /**
  * Sets timeout in request socket if it was specified in options.
  */
-export function timeout(req: IncomingMessage, res: ServerResponse, options: ProxyServerOptions): void {
+export function timeout(req: IncomingMessage, res: ServerResponse, options: ServerOptions): void {
   if (options.timeout) {
     req.socket.setTimeout(options.timeout);
   }
@@ -43,7 +43,7 @@ export function timeout(req: IncomingMessage, res: ServerResponse, options: Prox
 /**
  * Sets `x-forwarded-*` headers if specified in config.
  */
-export function XHeaders(req: IncomingMessage, res: ServerResponse, options: ProxyServerOptions): void {
+export function XHeaders(req: IncomingMessage, res: ServerResponse, options: ServerOptions): void {
   if (!options.xfwd) return;
 
   const encrypted = (req as any).isSpdy || common.hasEncryptedConnection(req);
@@ -71,7 +71,7 @@ export function XHeaders(req: IncomingMessage, res: ServerResponse, options: Pro
 export function stream(
   req: IncomingMessage,
   res: ServerResponse,
-  options: ProxyServerOptions,
+  options: ServerOptions,
   _: unknown,
   server: ProxyServer,
   clb?: ErrorCallback,
