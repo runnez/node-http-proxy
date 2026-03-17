@@ -1,20 +1,41 @@
 {
-  "name": "http-proxy",
+  "name": "@runnez/http-proxy-modern",
   "version": "2.0.0",
+  "description": "HTTP proxying modernized",
+  "homepage": "https://github.com/runnez/node-http-proxy#readme",
+  "bugs": {
+    "url": "https://github.com/runnez/node-http-proxy/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/http-party/node-http-proxy.git"
+    "url": "git+https://github.com/runnez/node-http-proxy.git"
   },
-  "description": "HTTP proxying for the masses",
-  "author": "Charlie Robbins <charlie.robbins@gmail.com>",
+  "license": "MIT",
+  "author": "Andrew B",
   "maintainers": [
-    "jcrugzz <jcrugzz@gmail.com>"
+    {
+      "name": "runnez"
+    }
   ],
+  "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "directories": {
+    "doc": "doc",
+    "example": "examples",
+    "lib": "lib",
+    "test": "test"
+  },
   "files": [
     "dist"
   ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:ci": "vitest run --coverage",
+    "test:watch": "vitest",
+    "version": "auto-changelog -p && git add CHANGELOG.md"
+  },
   "dependencies": {
     "eventemitter3": "^5.0.0",
     "follow-redirects": "^1.0.0",
@@ -31,16 +52,7 @@
     "typescript": "^5.9.3",
     "vitest": "^3.0.0"
   },
-  "scripts": {
-    "build": "tsc",
-    "test": "vitest run",
-    "test:ci": "vitest run --coverage",
-    "test:watch": "vitest",
-    "prepublishOnly": "npm run build",
-    "version": "auto-changelog -p && git add CHANGELOG.md"
-  },
   "engines": {
     "node": ">=24.0.0"
-  },
-  "license": "MIT"
+  }
 }
