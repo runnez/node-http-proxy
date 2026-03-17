@@ -24,32 +24,29 @@
 
 */
 
-var http = require('http'),
-    connect = require('connect'),
-    request = require('request'),
-    colors = require('colors'),
-    util = require('util'),
-    queryString = require('querystring'),
-    bodyParser = require('body-parser'),
-    httpProxy = require('../../lib/http-proxy'),
-    proxy = httpProxy.createProxyServer({});
+import http from 'node:http';
+import connect from 'connect';
+import bodyParser from 'body-parser';
+import httpProxy from '../../dist/http-proxy.js';
+
+const proxy = httpProxy.createProxyServer({});
 
 
 //restream parsed body before proxying
-proxy.on('proxyReq', function(proxyReq, req, res, options) {
+proxy.on('proxyReq', (proxyReq, req, res, options) => {
   if (!req.body || !Object.keys(req.body).length) {
     return;
   }
 
-  var contentType = proxyReq.getHeader('Content-Type');
-  var bodyData;
+  const contentType = proxyReq.getHeader('Content-Type');
+  let bodyData;
 
   if (contentType === 'application/json') {
     bodyData = JSON.stringify(req.body);
   }
 
   if (contentType === 'application/x-www-form-urlencoded') {
-    bodyData = queryString.stringify(req.body);
+    bodyData = new URLSearchParams(req.body).toString();
   }
 
   if (bodyData) {
@@ -62,19 +59,19 @@ proxy.on('proxyReq', function(proxyReq, req, res, options) {
 //
 //  Basic Http Proxy Server
 //
-var app = connect()
+const app = connect()
   .use(bodyParser.json())//json parser
   .use(bodyParser.urlencoded())//urlencoded parser
-  .use(function(req, res){
+  .use((req, res) => {
     // modify body here,
     // eg: req.body = {a: 1}.
-    console.log('proxy body:',req.body)
+    console.log('proxy body:', req.body);
     proxy.web(req, res, {
       target: 'http://127.0.0.1:9013'
-    })
+    });
   });
 
-http.createServer(app).listen(8013, function(){
+http.createServer(app).listen(8013, () => {
   console.log('proxy linsten 8013');
 });
 
@@ -83,26 +80,36 @@ http.createServer(app).listen(8013, function(){
 //
 //  Target Http Server
 //
-var app1 = connect()
+const app1 = connect()
   .use(bodyParser.json())
-  .use(function(req, res){
-    console.log('app1:',req.body)
-    res.end('request successfully proxied to: ' + req.url + '\n' + JSON.stringify(req.headers, true, 2));
+  .use((req, res) => {
+    console.log('app1:', req.body);
+    res.end(`request successfully proxied to: ${req.url}\n${JSON.stringify(req.headers, true, 2)}`);
   });
-http.createServer(app1).listen(9013, function(){
+http.createServer(app1).listen(9013, async () => {
   //request to 8013 to proxy
-  request.post({//
-    url: 'http://127.0.0.1:8013',
-    json: {content: 123, type: "greeting from json request"}
-  },function(err, res,data){
-    console.log('return for json request:' ,err, data)
-  })
+  try {
+    const jsonRes = await fetch('http://127.0.0.1:8013', {//
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({content: 123, type: "greeting from json request"})
+    });
+    const jsonData = await jsonRes.text();
+    console.log('return for json request:', null, jsonData);
+  } catch (err) {
+    console.log('return for json request:', err);
+  }
 
   // application/x-www-form-urlencoded request
-  request.post({//
-    url: 'http://127.0.0.1:8013',
-    form: {content: 123, type: "greeting from urlencoded request"}
-  },function(err, res,data){
-    console.log('return for urlencoded request:' ,err, data)
-  })
+  try {
+    const formRes = await fetch('http://127.0.0.1:8013', {//
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({content: '123', type: "greeting from urlencoded request"}).toString()
+    });
+    const formData = await formRes.text();
+    console.log('return for urlencoded request:', null, formData);
+  } catch (err) {
+    console.log('return for urlencoded request:', err);
+  }
 });

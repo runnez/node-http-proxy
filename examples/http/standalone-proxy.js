@@ -24,17 +24,16 @@
 
 */
 
-var util = require('util'),
-    colors = require('colors'),
-    http = require('http'),
-    httpProxy = require('../../lib/http-proxy');
+import { styleText } from 'node:util';
+import http from 'node:http';
+import httpProxy from '../../dist/http-proxy.js';
 
 //
 // Http Server with proxyRequest Handler and Latency
 //
-var proxy = new httpProxy.createProxyServer();
-http.createServer(function (req, res) {
-  setTimeout(function () {
+const proxy = httpProxy.createProxyServer();
+http.createServer((req, res) => {
+  setTimeout(() => {
     proxy.web(req, res, {
       target: 'http://localhost:9002'
     });
@@ -44,11 +43,11 @@ http.createServer(function (req, res) {
 //
 // Target Http Server
 //
-http.createServer(function (req, res) {
+http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.write('request successfully proxied to: ' + req.url + '\n' + JSON.stringify(req.headers, true, 2));
+  res.write(`request successfully proxied to: ${req.url}\n${JSON.stringify(req.headers, true, 2)}`);
   res.end();
 }).listen(9002);
 
-util.puts('http server '.blue + 'started '.green.bold + 'on port '.blue + '8002 '.yellow + 'with proxy.web() handler'.cyan.underline + ' and latency'.magenta);
-util.puts('http server '.blue + 'started '.green.bold + 'on port '.blue + '9002 '.yellow);
+console.log(`${styleText('blue', 'http server ')}${styleText(['green', 'bold'], 'started ')}${styleText('blue', 'on port ')}${styleText('yellow', '8002 ')}${styleText(['cyan', 'underline'], 'with proxy.web() handler')}${styleText('magenta', ' and latency')}`);
+console.log(`${styleText('blue', 'http server ')}${styleText(['green', 'bold'], 'started ')}${styleText('blue', 'on port ')}${styleText('yellow', '9002 ')}`);

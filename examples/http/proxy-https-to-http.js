@@ -24,19 +24,18 @@
 
 */
 
-var https = require('https'),
-    http  = require('http'),
-    util  = require('util'),
-    path  = require('path'),
-    fs    = require('fs'),
-    colors = require('colors'),
-    httpProxy = require('../../lib/http-proxy'),
-    fixturesDir = path.join(__dirname, '..', '..', 'test', 'fixtures');
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import { styleText } from 'node:util';
+import httpProxy from '../../dist/http-proxy.js';
+
+const fixturesDir = path.join(import.meta.dirname, '..', '..', 'test', 'fixtures');
 
 //
 // Create the target HTTP server
 //
-http.createServer(function (req, res) {
+http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.write('hello http over https\n');
   res.end();
@@ -56,5 +55,5 @@ httpProxy.createServer({
   }
 }).listen(8009);
 
-util.puts('https proxy server'.blue + ' started '.green.bold + 'on port '.blue + '8009'.yellow);
-util.puts('http server '.blue + 'started '.green.bold + 'on port '.blue + '9009 '.yellow);
+console.log(`${styleText('blue', 'https proxy server')}${styleText(['green', 'bold'], ' started ')}${styleText('blue', 'on port ')}${styleText('yellow', '8009')}`);
+console.log(`${styleText('blue', 'http server ')}${styleText(['green', 'bold'], 'started ')}${styleText('blue', 'on port ')}${styleText('yellow', '9009 ')}`);

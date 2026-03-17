@@ -24,14 +24,14 @@
 
 */
 
-var http = require('http'),
-    httpProxy = require('../../lib/http-proxy');
+import http from 'node:http';
+import httpProxy from '../../dist/http-proxy.js';
 //
 // A simple round-robin load balancing strategy.
 //
 // First, list the servers you want to use in your rotation.
 //
-var addresses = [
+const addresses = [
   {
     host: 'ws1.0.0.0',
     port: 80
@@ -41,13 +41,13 @@ var addresses = [
     port: 80
   }
 ];
-var proxy = httpProxy.createServer();
+const proxy = httpProxy.createServer();
 
-http.createServer(function (req, res) {
+http.createServer((req, res) => {
   //
   // On each request, get the first location from the list...
   //
-  var target = { target: addresses.shift() };
+  const target = { target: addresses.shift() };
 
   //
   // ...then proxy to the server whose 'turn' it is...

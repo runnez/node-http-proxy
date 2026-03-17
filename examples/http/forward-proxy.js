@@ -24,10 +24,9 @@
 
 */
 
-var util = require('util'),
-    colors = require('colors'),
-    http = require('http'),
-    httpProxy = require('../../lib/http-proxy');
+import { styleText } from 'node:util';
+import http from 'node:http';
+import httpProxy from '../../dist/http-proxy.js';
 
 //
 // Setup proxy server with forwarding
@@ -42,12 +41,12 @@ httpProxy.createServer({
 //
 // Target Http Forwarding Server
 //
-http.createServer(function (req, res) {
-  util.puts('Receiving forward for: ' + req.url);
+http.createServer((req, res) => {
+  console.log(`Receiving forward for: ${req.url}`);
   res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.write('request successfully forwarded to: ' + req.url + '\n' + JSON.stringify(req.headers, true, 2));
+  res.write(`request successfully forwarded to: ${req.url}\n${JSON.stringify(req.headers, true, 2)}`);
   res.end();
 }).listen(9019);
 
-util.puts('http proxy server '.blue + 'started '.green.bold + 'on port '.blue + '8019 '.yellow + 'with forward proxy'.magenta.underline);
-util.puts('http forward server '.blue + 'started '.green.bold + 'on port '.blue + '9019 '.yellow);
+console.log(styleText('blue', 'http proxy server ') + styleText(['green', 'bold'], 'started ') + styleText('blue', 'on port ') + styleText('yellow', '8019 ') + styleText(['magenta', 'underline'], 'with forward proxy'));
+console.log(styleText('blue', 'http forward server ') + styleText(['green', 'bold'], 'started ') + styleText('blue', 'on port ') + styleText('yellow', '9019 '));

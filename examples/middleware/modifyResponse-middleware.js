@@ -24,27 +24,27 @@
 
 */
 
-var util = require('util'),
-    colors = require('colors'),
-    http = require('http'),
-    connect = require('connect'),
-    app = connect(),
-    httpProxy = require('../../lib/http-proxy');
+import http from 'node:http';
+import { styleText } from 'node:util';
+import connect from 'connect';
+import httpProxy from '../../dist/http-proxy.js';
+
+const app = connect();
 
 //
 // Basic Connect App
 //
-app.use(function (req, res, next) {
-  var _write = res.write;
+app.use((req, res, next) => {
+  const _write = res.write;
 
   res.write = function (data) {
     _write.call(res, data.toString().replace("Ruby", "http-party"));
-  }
+  };
   next();
 });
 
-app.use(function (req, res) {
-  proxy.web(req, res)
+app.use((req, res) => {
+  proxy.web(req, res);
 });
 
 http.createServer(app).listen(8013);
@@ -52,18 +52,17 @@ http.createServer(app).listen(8013);
 //
 // Basic Http Proxy Server
 //
-var proxy = httpProxy.createProxyServer({
+const proxy = httpProxy.createProxyServer({
   target: 'http://localhost:9013'
 });
 
 //
 // Target Http Server
 //
-http.createServer(function (req, res) {
+http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Hello, I love Ruby\n');
 }).listen(9013);
 
-util.puts('http proxy server'.blue + ' started '.green.bold + 'on port '.blue + '8013'.yellow);
-util.puts('http server '.blue + 'started '.green.bold + 'on port '.blue + '9013 '.yellow);
-
+console.log(`${styleText('blue', 'http proxy server')}${styleText(['green', 'bold'], ' started ')}${styleText('blue', 'on port ')}${styleText('yellow', '8013')}`);
+console.log(`${styleText('blue', 'http server ')}${styleText(['green', 'bold'], 'started ')}${styleText('blue', 'on port ')}${styleText('yellow', '9013 ')}`);
